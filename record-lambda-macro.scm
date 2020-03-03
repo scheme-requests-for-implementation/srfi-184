@@ -16,15 +16,15 @@
   (lp args))
 ;; (define-macro (unquote-get symbol args)
 ;;   (if (null? args)
-;;	 `(error err-str ,symbol)
-;;	 (let ((arg (car args)))
-;;	(if (pair? arg)
-;;	    `(if (eq? ,symbol ',(car arg))
-;;		 ,(cadr arg)
-;;		 (unquote-get ,symbol ,(cdr args)))
-;;	    `(if (eq? ,symbol ',arg)
-;;		 ,arg
-;;		 (unquote-get ,symbol ,(cdr args)))))))
+;;       `(error err-str ,symbol)
+;;       (let ((arg (car args)))
+;; 	(if (pair? arg)
+;; 	    `(if (eq? ,symbol ',(car arg))
+;; 		 ,(cadr arg)
+;; 		 (unquote-get ,symbol ,(cdr args)))
+;; 	    `(if (eq? ,symbol ',arg)
+;; 		 ,arg
+;; 		 (unquote-get ,symbol ,(cdr args)))))))
 
 (define-macro (unquote-set! symbol new-val args)
   (define (lp args)
@@ -35,6 +35,76 @@
 	       (set! ,arg ,new-val)
 	       ,(lp (cdr args))))))
   (lp args))
+
+(define-macro (seq-lambda r o body)
+  (define (opt-seq z cls body)
+    (if (null? cls)
+	`(if (null? ,z)
+	     ,body
+	     (error "define-record-lambda: too many arguments" ,z))
+	(let ((cl (car cls)))
+	  `(let ((,(car cl) (if (null? ,z) ,(cadr cl) (car ,z)))
+		 (,z (if (null? ,z) ,z (cdr ,z))))
+	     ,(opt-seq z (cdr cls) body)))))
+  (if (null? o)
+      `(lambda ,r ,body)
+      (let ((z (gensym)))
+	`(lambda (,@r . ,z)
+	   ,(opt-seq z o body)))))
+
+(define (field-key z k d)
+  (let ((x (car z)) (y (cdr z)))
+    (if (null? y)
+	(cons d z)
+	(if (eq? k x)
+	    y
+	    (let lp ((head (list x (car y))) (tail (cdr y)))
+	      (if (null? tail)
+		  (cons d z)
+		  (let ((x (car tail)) (y (cdr tail)))
+		    (if (null? y)
+			(cons d z)
+			(if (eq? k x)
+			    (cons (car y) (append head (cdr y)))
+			    (lp (cons x (cons (car y) head)) (cdr y)))))))))))
+(define-macro (field-key! z k d)
+  (let ((x (gensym))
+	(y (gensym))
+	(head (gensym))
+	(tail (gensym)))
+    `(let ((,x (car ,z)) (,y (cdr ,z)))
+       (if (null? ,y)
+	   ,d
+	   (if (eq? ,k ,x)
+	       (begin (set! ,z (cdr ,y)) (car ,y))
+	       (let lp ((,head (list ,x (car ,y))) (,tail (cdr ,y)))
+		 (if (null? ,tail)
+		     ,d
+		     (let ((,x (car ,tail)) (,y (cdr ,tail)))
+		       (if (null? ,y)
+			   ,d
+			   (if (eq? ,k ,x)
+			       (begin
+				 (set! ,z (append ,head (cdr ,y)))
+				 (car ,y))
+			       (lp (cons ,x (cons (car ,y) ,head)) (cdr ,y))))))))))))
+(define-macro (key-lambda r o body)
+  (define (opt-key z cls body)
+    (if (null? cls)
+	`(if (null? ,z)
+	     ,body
+	     (error "define-record-lambda: too many arguments" ,z))
+	(let ((cl (car cls)))
+	  (let ((key (car cl)) (var (cadr cl)) (val (caddr cl)))
+	    `(let ((,var (if (null? ,z) ,val (field-key! ,z ',key ,val))))
+	    ;; `(let* ((,z (if (null? ,z) (cons ,val ,z) (field-key ,z ',key ,val)))
+	    ;; 	    (,var (car ,z))
+	    ;; 	    (,z (cdr ,z)))
+	       ,(opt-key z (cdr cls) body))))))
+  (if (null? o)
+      `(lambda ,r ,body)
+      (let ((z (gensym)))
+	`(lambda (,@r . ,z) ,(opt-key z o body)))))
 
 (define (check-duplicate ls err-str)
   (cond ((null? ls) #f)
@@ -51,7 +121,6 @@
   (let ((arg (gensym))
 	;; (val (gensym))
 	(args (gensym))
-	(rest (gensym))
 	(maker (gensym))
 	(maker/s (gensym))
 	(v-all (gensym))
@@ -79,14 +148,13 @@
 	 (define ,num-m (length ,name-alist-m))
 	 ,@(map (lambda (f) `(define ,f (cdr (assq ',f ,name-alist-a)))) name-fi)
 	 ,@(map (lambda (f) `(define ,f (cdr (assq ',f ,name-alist-m)))) name-fm)
-
+	 
 	 ;; You can choose a suitable constructor.
 	 ;; 1. number
 	 (define ,maker
 	   (let* ,(map cdr c)
-	     (cons (lambda (,@(map cadr r) . ,rest)
-		     (alet* ((opt ,rest ,@(map cdr o))
-			     ,@(map cdr a))
+	     (cons (seq-lambda ,(map cadr r) ,(map cdr o)
+		     (let* ,(map cdr a)
 		       (define ,unique-name
 			 (if (and (null? ',c) (null? ',o) (null? ',a) (null? ',v))
 			     (let ((,v-all (vector ,@fm ,@(map cadr fi))))
@@ -105,8 +173,8 @@
 				 ;; (case-lambda
 				 ;;  ((,arg) (vector-ref ,v-all ,arg))
 				 ;;  ((,arg ,val) (if (< ,arg ,num-m)
-				 ;;		   (vector-set! ,v-all ,arg ,val)
-				 ;;		   (error err-str ,arg)))))))
+				 ;; 		   (vector-set! ,v-all ,arg ,val)
+				 ;; 		   (error err-str ,arg)))))))
 				 (lambda (,arg . ,args)
 				   (if (null? ,args)
 				       (vector-ref ,v-all ,arg)
@@ -115,16 +183,15 @@
 					   (error err-str ,arg)))))))
 			     (let ((,v-all (vector ,@(map (lambda (f) `(lambda (,safe) (if (eq? ,safe ',unique-name) ,f (set! ,f ,safe)))) fm) ,@(map (lambda (f) `(lambda (,safe) (if (eq? ,safe ',unique-name) ,f (error ,err-str)))) (map cadr fi)))))
 			       ;; (case-lambda
-			       ;;	((,arg) ((vector-ref ,v-all ,arg) ',unique-name))
-			       ;;	((,arg ,val) ((vector-ref ,v-all ,arg) ,val))))))
+			       ;; 	((,arg) ((vector-ref ,v-all ,arg) ',unique-name))
+			       ;; 	((,arg ,val) ((vector-ref ,v-all ,arg) ,val))))))
 			       (lambda (,arg . ,args)
 				 (if (null? ,args)
 				     ((vector-ref ,v-all ,arg) ',unique-name)
 				     ((vector-ref ,v-all ,arg) (car ,args)))))))
 		       ,unique-name))
-		   (lambda (,@(map cadr r) . ,rest)
-		     (alet* ((opt ,rest ,@(map (lambda (ntv) `((',(cadr ntv) ',(car ntv)) ,(caddr ntv))) o))
-			     ,@(map cdr a))
+		   (key-lambda ,(map cadr r) ,o
+		     (let* ,(map cdr a)
 		       (define ,unique-name
 			 (if (and (null? ',c) (null? ',o) (null? ',a) (null? ',v))
 			     (let ((,v-all (vector ,@fm ,@(map cadr fi))))
@@ -143,8 +210,8 @@
 				 ;; (case-lambda
 				 ;;  ((,arg) (vector-ref ,v-all ,arg))
 				 ;;  ((,arg ,val) (if (< ,arg ,num-m)
-				 ;;		   (vector-set! ,v-all ,arg ,val)
-				 ;;		   (error err-str ,arg)))))))
+				 ;; 		   (vector-set! ,v-all ,arg ,val)
+				 ;; 		   (error err-str ,arg)))))))
 				 (lambda (,arg . ,args)
 				   (if (null? ,args)
 				       (vector-ref ,v-all ,arg)
@@ -153,8 +220,8 @@
 					   (error err-str ,arg)))))))
 			     (let ((,v-all (vector ,@(map (lambda (f) `(lambda (,safe) (if (eq? ,safe ',unique-name) ,f (set! ,f ,safe)))) fm) ,@(map (lambda (f) `(lambda (,safe) (if (eq? ,safe ',unique-name) ,f (error ,err-str)))) (map cadr fi)))))
 			       ;; (case-lambda
-			       ;;	((,arg) ((vector-ref ,v-all ,arg) ',unique-name))
-			       ;;	((,arg ,val) ((vector-ref ,v-all ,arg) ,val))))))
+			       ;; 	((,arg) ((vector-ref ,v-all ,arg) ',unique-name))
+			       ;; 	((,arg ,val) ((vector-ref ,v-all ,arg) ,val))))))
 			       (lambda (,arg . ,args)
 				 (if (null? ,args)
 				     ((vector-ref ,v-all ,arg) ',unique-name)
@@ -166,25 +233,23 @@
 	 ;; 2. symbol
 	 (define ,maker/s
 	   (let* ,(map cdr c)
-	     (cons (lambda (,@(map cadr r) . ,rest)
-		     (alet* ((opt ,rest ,@(map cdr o))
-			     ,@(map cdr a))
+	     (cons (seq-lambda ,(map cadr r) ,(map cdr o)
+		     (let* ,(map cdr a)
 		       (define ,unique-name
 			 ;; (case-lambda
-			 ;;  ((,arg) (unquote-get ,arg ,(append (map list fm fm) fi)))
-			 ;;  ((,arg ,val) (unquote-set! ,arg ,val ,fm))))
+		       	 ;;  ((,arg) (unquote-get ,arg ,(append (map list fm fm) fi)))
+		       	 ;;  ((,arg ,val) (unquote-set! ,arg ,val ,fm))))
 			 (lambda (,arg . ,args)
 			   (if (null? ,args)
 			       (unquote-get ,arg ,(append (map list fm fm) fi))
 			       (unquote-set! ,arg (car ,args) ,fm))))
 		       ,unique-name))
-		   (lambda (,@(map cadr r) . ,rest)
-		     (alet* ((opt ,rest ,@(map (lambda (ntv) `((',(cadr ntv) ',(car ntv)) ,(caddr ntv))) o))
-			     ,@(map cdr a))
+		   (key-lambda ,(map cadr r) ,o
+		     (let* ,(map cdr a)
 		       (define ,unique-name
 			 ;; (case-lambda
-			 ;;  ((,arg) (unquote-get ,arg ,(append (map list fm fm) fi)))
-			 ;;  ((,arg ,val) (unquote-set! ,arg ,val ,fm))))
+		       	 ;;  ((,arg) (unquote-get ,arg ,(append (map list fm fm) fi)))
+		       	 ;;  ((,arg ,val) (unquote-set! ,arg ,val ,fm))))
 			 (lambda (,arg . ,args)
 			   (if (null? ,args)
 			       (unquote-get ,arg ,(append (map list fm fm) fi))
@@ -195,9 +260,10 @@
 
 	 ;; The predicate procedure is implementation dependant.
 	 ;; A procedure such as `object-name' is necessary for this to work.
+
 	 (define (,pred-record record)	;racket
 	   (eq? ',unique-name (object-name record)))
-
+	
 	 (define ,name
 	   (let ((constructor `(,,maker ,,maker/s))
 		 (predicate ,pred-record)
@@ -241,17 +307,17 @@
 				(cond
 				 ((eq? 'quasiquote var)
 				  (if (null? o)	;`r
-				      (let ((val (cadr vars)))
+				      (let ((rva (cadr vars)))
 					(field-sort (cdr field)
 						    fm fi
-						    c (append r (list (list val val))) o a (append h (list (list val val))) i v))
+						    c (append r (list (list rva rva))) o a (append h (list (list rva rva))) i v))
 				      (error "define-record-lambda: required-field should precede optional-field" var)))
 				 ((eq? 'quote var)
 				  (if (null? o)	;'r
-				      (let ((t (gensym)) (val (cadr vars)))
+				      (let ((t (gensym)) (rva (cadr vars)))
 					(field-sort (cdr field)
-						    fm (append fi (list (list val t)))
-						    c (append r (list (list val t))) o a h (append i (list (list val val))) v))
+						    fm (append fi (list (list rva t)))
+						    c (append r (list (list rva t))) o a h (append i (list (list rva rva))) v))
 				      (error "define-record-lambda: required-field should precede optional-field" var)))
 				 (else	;(o val)
 				  (field-sort (cdr field)
