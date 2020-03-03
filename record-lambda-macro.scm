@@ -16,15 +16,15 @@
   (lp args))
 ;; (define-macro (unquote-get symbol args)
 ;;   (if (null? args)
-;;       `(error err-str ,symbol)
-;;       (let ((arg (car args)))
-;; 	(if (pair? arg)
-;; 	    `(if (eq? ,symbol ',(car arg))
-;; 		 ,(cadr arg)
-;; 		 (unquote-get ,symbol ,(cdr args)))
-;; 	    `(if (eq? ,symbol ',arg)
-;; 		 ,arg
-;; 		 (unquote-get ,symbol ,(cdr args)))))))
+;;	 `(error err-str ,symbol)
+;;	 (let ((arg (car args)))
+;;	(if (pair? arg)
+;;	    `(if (eq? ,symbol ',(car arg))
+;;		 ,(cadr arg)
+;;		 (unquote-get ,symbol ,(cdr args)))
+;;	    `(if (eq? ,symbol ',arg)
+;;		 ,arg
+;;		 (unquote-get ,symbol ,(cdr args)))))))
 
 (define-macro (unquote-set! symbol new-val args)
   (define (lp args)
@@ -98,8 +98,8 @@
 	  (let ((key (car cl)) (var (cadr cl)) (val (caddr cl)))
 	    `(let ((,var (if (null? ,z) ,val (field-key! ,z ',key ,val))))
 	    ;; `(let* ((,z (if (null? ,z) (cons ,val ,z) (field-key ,z ',key ,val)))
-	    ;; 	    (,var (car ,z))
-	    ;; 	    (,z (cdr ,z)))
+	    ;;	    (,var (car ,z))
+	    ;;	    (,z (cdr ,z)))
 	       ,(opt-key z (cdr cls) body))))))
   (if (null? o)
       `(lambda ,r ,body)
@@ -148,7 +148,7 @@
 	 (define ,num-m (length ,name-alist-m))
 	 ,@(map (lambda (f) `(define ,f (cdr (assq ',f ,name-alist-a)))) name-fi)
 	 ,@(map (lambda (f) `(define ,f (cdr (assq ',f ,name-alist-m)))) name-fm)
-	 
+
 	 ;; You can choose a suitable constructor.
 	 ;; 1. number
 	 (define ,maker
@@ -173,8 +173,8 @@
 				 ;; (case-lambda
 				 ;;  ((,arg) (vector-ref ,v-all ,arg))
 				 ;;  ((,arg ,val) (if (< ,arg ,num-m)
-				 ;; 		   (vector-set! ,v-all ,arg ,val)
-				 ;; 		   (error err-str ,arg)))))))
+				 ;;		   (vector-set! ,v-all ,arg ,val)
+				 ;;		   (error err-str ,arg)))))))
 				 (lambda (,arg . ,args)
 				   (if (null? ,args)
 				       (vector-ref ,v-all ,arg)
@@ -183,8 +183,8 @@
 					   (error err-str ,arg)))))))
 			     (let ((,v-all (vector ,@(map (lambda (f) `(lambda (,safe) (if (eq? ,safe ',unique-name) ,f (set! ,f ,safe)))) fm) ,@(map (lambda (f) `(lambda (,safe) (if (eq? ,safe ',unique-name) ,f (error ,err-str)))) (map cadr fi)))))
 			       ;; (case-lambda
-			       ;; 	((,arg) ((vector-ref ,v-all ,arg) ',unique-name))
-			       ;; 	((,arg ,val) ((vector-ref ,v-all ,arg) ,val))))))
+			       ;;	((,arg) ((vector-ref ,v-all ,arg) ',unique-name))
+			       ;;	((,arg ,val) ((vector-ref ,v-all ,arg) ,val))))))
 			       (lambda (,arg . ,args)
 				 (if (null? ,args)
 				     ((vector-ref ,v-all ,arg) ',unique-name)
@@ -210,8 +210,8 @@
 				 ;; (case-lambda
 				 ;;  ((,arg) (vector-ref ,v-all ,arg))
 				 ;;  ((,arg ,val) (if (< ,arg ,num-m)
-				 ;; 		   (vector-set! ,v-all ,arg ,val)
-				 ;; 		   (error err-str ,arg)))))))
+				 ;;		   (vector-set! ,v-all ,arg ,val)
+				 ;;		   (error err-str ,arg)))))))
 				 (lambda (,arg . ,args)
 				   (if (null? ,args)
 				       (vector-ref ,v-all ,arg)
@@ -220,8 +220,8 @@
 					   (error err-str ,arg)))))))
 			     (let ((,v-all (vector ,@(map (lambda (f) `(lambda (,safe) (if (eq? ,safe ',unique-name) ,f (set! ,f ,safe)))) fm) ,@(map (lambda (f) `(lambda (,safe) (if (eq? ,safe ',unique-name) ,f (error ,err-str)))) (map cadr fi)))))
 			       ;; (case-lambda
-			       ;; 	((,arg) ((vector-ref ,v-all ,arg) ',unique-name))
-			       ;; 	((,arg ,val) ((vector-ref ,v-all ,arg) ,val))))))
+			       ;;	((,arg) ((vector-ref ,v-all ,arg) ',unique-name))
+			       ;;	((,arg ,val) ((vector-ref ,v-all ,arg) ,val))))))
 			       (lambda (,arg . ,args)
 				 (if (null? ,args)
 				     ((vector-ref ,v-all ,arg) ',unique-name)
@@ -237,8 +237,8 @@
 		     (let* ,(map cdr a)
 		       (define ,unique-name
 			 ;; (case-lambda
-		       	 ;;  ((,arg) (unquote-get ,arg ,(append (map list fm fm) fi)))
-		       	 ;;  ((,arg ,val) (unquote-set! ,arg ,val ,fm))))
+			 ;;  ((,arg) (unquote-get ,arg ,(append (map list fm fm) fi)))
+			 ;;  ((,arg ,val) (unquote-set! ,arg ,val ,fm))))
 			 (lambda (,arg . ,args)
 			   (if (null? ,args)
 			       (unquote-get ,arg ,(append (map list fm fm) fi))
@@ -248,8 +248,8 @@
 		     (let* ,(map cdr a)
 		       (define ,unique-name
 			 ;; (case-lambda
-		       	 ;;  ((,arg) (unquote-get ,arg ,(append (map list fm fm) fi)))
-		       	 ;;  ((,arg ,val) (unquote-set! ,arg ,val ,fm))))
+			 ;;  ((,arg) (unquote-get ,arg ,(append (map list fm fm) fi)))
+			 ;;  ((,arg ,val) (unquote-set! ,arg ,val ,fm))))
 			 (lambda (,arg . ,args)
 			   (if (null? ,args)
 			       (unquote-get ,arg ,(append (map list fm fm) fi))
@@ -263,7 +263,7 @@
 
 	 (define (,pred-record record)	;racket
 	   (eq? ',unique-name (object-name record)))
-	
+
 	 (define ,name
 	   (let ((constructor `(,,maker ,,maker/s))
 		 (predicate ,pred-record)

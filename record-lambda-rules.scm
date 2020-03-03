@@ -83,8 +83,8 @@
     ((key-lambda (z) () ((o t v) . e) body)
      (let ((t (if (null? z) v (field-key! z 'o v))))
      ;; (let* ((z (if (null? z) (cons v z) (field-key z 'o v)))
-     ;; 	    (t (car z))
-     ;; 	    (z (cdr z)))
+     ;;		    (t (car z))
+     ;;		    (z (cdr z)))
        (key-lambda (z) () e body)))
     ((key-lambda (z) () () body)
      (if (null? z)
@@ -115,7 +115,7 @@
        (define num-m (length name-alist-m))
        (define name-fi (cdr (assq 'name-fi name-alist-a))) ...
        (define name-fm (cdr (assq 'name-fm name-alist-m))) ...
-       
+
        ;; You can choose a suitable constructor.
        ;; 1. number
        (define maker
@@ -128,8 +128,8 @@
 			     (cond
 			      ((null? '(fi ...))
 			       ;; (case-lambda
-			       ;; 	((arg) (vector-ref v-all arg))
-			       ;; 	((arg val) (vector-set! v-all arg val))))
+			       ;;	((arg) (vector-ref v-all arg))
+			       ;;	((arg val) (vector-set! v-all arg val))))
 			       (lambda (arg . args)
 				 (if (null? args)
 				     (vector-ref v-all arg)
@@ -138,10 +138,10 @@
 			       (lambda (arg) (vector-ref v-all arg)))
 			      (else
 			       ;; (case-lambda
-			       ;; 	((arg) (vector-ref v-all arg))
-			       ;; 	((arg val) (if (< arg num-m)
-			       ;; 		       (vector-set! v-all arg val)
-			       ;; 		       (error err-str arg)))))))
+			       ;;	((arg) (vector-ref v-all arg))
+			       ;;	((arg val) (if (< arg num-m)
+			       ;;		       (vector-set! v-all arg val)
+			       ;;		       (error err-str arg)))))))
 			       (lambda (arg . args)
 				 (if (null? args)
 				     (vector-ref v-all arg)
@@ -150,8 +150,8 @@
 					 (error err-str arg)))))))
 			   (let ((v-all (vector (lambda (x) (if (eq? 'unique-name x) fm (set! fm x))) ... (lambda (x) (if (eq? 'unique-name x) fd (error err-str))) ...)))
 			     ;; (case-lambda
-			     ;;  ((arg) ((vector-ref v-all arg) 'unique-name))
-			     ;;  ((arg val) ((vector-ref v-all arg) val))))))
+			     ;;	 ((arg) ((vector-ref v-all arg) 'unique-name))
+			     ;;	 ((arg val) ((vector-ref v-all arg) val))))))
 			     (lambda (arg . args)
 			       (if (null? args)
 				   ((vector-ref v-all arg) 'unique-name)
@@ -165,8 +165,8 @@
 			     (cond
 			      ((null? '(fi ...))
 			       ;; (case-lambda
-			       ;; 	((arg) (vector-ref v-all arg))
-			       ;; 	((arg val) (vector-set! v-all arg val))))
+			       ;;	((arg) (vector-ref v-all arg))
+			       ;;	((arg val) (vector-set! v-all arg val))))
 			       (lambda (arg . args)
 				 (if (null? args)
 				     (vector-ref v-all arg)
@@ -175,10 +175,10 @@
 			       (lambda (arg) (vector-ref v-all arg)))
 			      (else
 			       ;; (case-lambda
-			       ;; 	((arg) (vector-ref v-all arg))
-			       ;; 	((arg val) (if (< arg num-m)
-			       ;; 		       (vector-set! v-all arg val)
-			       ;; 		       (error err-str arg)))))))
+			       ;;	((arg) (vector-ref v-all arg))
+			       ;;	((arg val) (if (< arg num-m)
+			       ;;		       (vector-set! v-all arg val)
+			       ;;		       (error err-str arg)))))))
 			       (lambda (arg . args)
 				 (if (null? args)
 				     (vector-ref v-all arg)
@@ -187,8 +187,8 @@
 					 (error err-str arg)))))))
 			   (let ((v-all (vector (lambda (x) (if (eq? 'unique-name x) fm (set! fm x))) ... (lambda (x) (if (eq? 'unique-name x) fd (error err-str))) ...)))
 			     ;; (case-lambda
-			     ;;  ((arg) ((vector-ref v-all arg) 'unique-name))
-			     ;;  ((arg val) ((vector-ref v-all arg) val))))))
+			     ;;	 ((arg) ((vector-ref v-all arg) 'unique-name))
+			     ;;	 ((arg val) ((vector-ref v-all arg) val))))))
 			     (lambda (arg . args)
 			       (if (null? args)
 				   ((vector-ref v-all arg) 'unique-name)
@@ -204,8 +204,8 @@
 		   (let* ((at av) ...)
 		     (define unique-name
 		       ;; (case-lambda
-		       ;; 	((arg) (unquote-get arg ((fm fm) ... (fi fd) ...)))
-		       ;; 	((arg val) (unquote-set! arg val (fm ...)))))
+		       ;;	((arg) (unquote-get arg ((fm fm) ... (fi fd) ...)))
+		       ;;	((arg val) (unquote-set! arg val (fm ...)))))
 		       (lambda (arg . args)
 			 (if (null? args)
 			     (unquote-get arg ((fm fm) ... (fi fd) ...))
@@ -215,8 +215,8 @@
 		   (let* ((at av) ...)
 		     (define unique-name
 		       ;; (case-lambda
-		       ;; 	((arg) (unquote-get arg ((fm fm) ... (fi fd) ...)))
-		       ;; 	((arg val) (unquote-set! arg val (fm ...)))))
+		       ;;	((arg) (unquote-get arg ((fm fm) ... (fi fd) ...)))
+		       ;;	((arg val) (unquote-set! arg val (fm ...)))))
 		       (lambda (arg . args)
 			 (if (null? args)
 			     (unquote-get arg ((fm fm) ... (fi fd) ...))
@@ -231,7 +231,7 @@
        ;; procedure is necessary.
 
        (define (pred-record record)	;racket
-       	 (eq? 'unique-name (object-name record)))
+	 (eq? 'unique-name (object-name record)))
 
        (define name
 	 (let ((constructor `(,maker ,maker/s))
@@ -256,33 +256,33 @@
 ;; (define-macro (define-identifier name fm fi c r o a h i v)
 ;;   (let ((nm-str (symbol->string name)))
 ;;     (let ((unique-name (gensym))
-;; 	  (make-record (string->symbol (string-append "make-" nm-str)))
-;; 	  (make-record-by-name (string->symbol (string-append "make-" nm-str "-by-name")))
-;; 	  (make-record/s (string->symbol (string-append "make-" nm-str "/s")))
-;; 	  (make-record-by-name/s (string->symbol (string-append "make-" nm-str "-by-name/s")))
-;; 	  (pred-record (string->symbol (string-append nm-str "?")))
-;; 	  (name-fm (map (lambda (x) (string->symbol (string-append nm-str "-" (symbol->string x)))) fm))
-;; 	  (name-fi (map (lambda (x) (string->symbol (string-append nm-str "-" (symbol->string x)))) (map car fi))))
-;;       `(define-lambda ,name ,unique-name ,make-record ,make-record-by-name ,make-record/s ,make-record-by-name/s ,pred-record ,name-fm ,name-fi ,fm ,fi ,c ,r ,o ,a ,h ,i ,v))))
+;;	  (make-record (string->symbol (string-append "make-" nm-str)))
+;;	  (make-record-by-name (string->symbol (string-append "make-" nm-str "-by-name")))
+;;	  (make-record/s (string->symbol (string-append "make-" nm-str "/s")))
+;;	  (make-record-by-name/s (string->symbol (string-append "make-" nm-str "-by-name/s")))
+;;	  (pred-record (string->symbol (string-append nm-str "?")))
+;;	  (name-fm (map (lambda (x) (string->symbol (string-append nm-str "-" (symbol->string x)))) fm))
+;;	  (name-fi (map (lambda (x) (string->symbol (string-append nm-str "-" (symbol->string x)))) (map car fi))))
+;;	 `(define-lambda ,name ,unique-name ,make-record ,make-record-by-name ,make-record/s ,make-record-by-name/s ,pred-record ,name-fm ,name-fi ,fm ,fi ,c ,r ,o ,a ,h ,i ,v))))
 
 ;; explicit renaming macro
 ;; (define-syntax define-identifier
 ;;   (er-macro-transformer
 ;;    (lambda (form rename compare)
-;;      (let* ((name (cadr form))
-;; 	    (fields (cddr form))
-;; 	    (nm-str (symbol->string name)))
-;;        (let ((unique-name (gensym))
-;; 	     (make-record (string->symbol (string-append "make-" nm-str)))
-;; 	     (make-record-by-name (string->symbol (string-append "make-" nm-str "-by-name")))
-;; 	     (make-record/s (string->symbol (string-append "make-" nm-str "/s")))
-;; 	     (make-record-by-name/s (string->symbol (string-append "make-" nm-str "-by-name/s")))
-;; 	     (pred-record (string->symbol (string-append nm-str "?")))
-;; 	     (name-fm (map (lambda (x) (string->symbol (string-append nm-str "-" (symbol->string x)))) (car fields)))
-;; 	     (name-fi (map (lambda (x) (string->symbol (string-append nm-str "-" (symbol->string x)))) (map car (cadr fields))))
-;; 	     (%define-lambda (rename 'define-lambda)))
-;; 	 `(,%define-lambda ,name ,unique-name ,make-record ,make-record-by-name ,make-record/s ,make-record-by-name/s ,pred-record ,name-fm ,name-fi ,@fields))))))
-  
+;;	(let* ((name (cadr form))
+;;	    (fields (cddr form))
+;;	    (nm-str (symbol->string name)))
+;;	  (let ((unique-name (gensym))
+;;	     (make-record (string->symbol (string-append "make-" nm-str)))
+;;	     (make-record-by-name (string->symbol (string-append "make-" nm-str "-by-name")))
+;;	     (make-record/s (string->symbol (string-append "make-" nm-str "/s")))
+;;	     (make-record-by-name/s (string->symbol (string-append "make-" nm-str "-by-name/s")))
+;;	     (pred-record (string->symbol (string-append nm-str "?")))
+;;	     (name-fm (map (lambda (x) (string->symbol (string-append nm-str "-" (symbol->string x)))) (car fields)))
+;;	     (name-fi (map (lambda (x) (string->symbol (string-append nm-str "-" (symbol->string x)))) (map car (cadr fields))))
+;;	     (%define-lambda (rename 'define-lambda)))
+;;	 `(,%define-lambda ,name ,unique-name ,make-record ,make-record-by-name ,make-record/s ,make-record-by-name/s ,pred-record ,name-fm ,name-fi ,@fields))))))
+
 ;; syntax-case macro
 (define-syntax define-identifier
   (lambda (x)
