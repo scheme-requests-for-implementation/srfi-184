@@ -6,7 +6,7 @@
 
 This repository hosts [[https://srfi.schemers.org/srfi-184/][SRFI 184]]: define-record-lambda, a [[https://srfi.schemers.org/][Scheme Request for Implementation]].
 
-This SRFI is in /draft/ status.
+This SRFI is in /withdrawn/ status.
 
 See also [[https://srfi.schemers.org/srfi-9/][SRFI 9: Defining Record Types]] and [[https://srfi.schemers.org/srfi-100/][SRFI 100: define-lambda-object]].
 
